@@ -1,3 +1,5 @@
+import configparser
+import logging
 import random
 import time
 
@@ -33,7 +35,7 @@ def has(v_type: str, value: str) -> any:
     return internal_has
 
 
-def print_elements(data: WebElement | list[WebElement]) -> None:
+def print_elements(data: WebElement | list[WebElement]) -> bool:
     if isinstance(data, list):
         print(f"{len(data)} elements")
         for idx, elm in enumerate(data):
@@ -42,7 +44,7 @@ def print_elements(data: WebElement | list[WebElement]) -> None:
         print(f"<{data.tag_name}> class='{data.get_attribute('class')}', text:{data.text}")
 
 
-def update_profile(config: map, salary: int) -> None:
+def update_profile(config: configparser.ConfigParser, salary: int) -> None:
     # noinspection PyTypeChecker
     email_field = password_field = signin_btn = None
     options = Options()
@@ -51,17 +53,16 @@ def update_profile(config: map, salary: int) -> None:
     driver = webdriver.Chrome(options=options)
     driver.set_window_size(1920, 1080)
     driver.maximize_window()
-    # driver = webdriver.Chrome(options=options, service=ChromeService(ChromeDriverManager().install()))
     driver.get(login_page)
     assert 'Sign In' in driver.title
     try:
         email_field: WebElement = WDWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'email')))
     except Exception as e:
-        print(e)
+        logging.exception('Exception occurred')
     try:
         password_field: WebElement = WDWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'password')))
     except Exception as e:
-        print(e)
+        logging.exception('Exception occurred')
     email_field.clear()
     password_field.clear()
     email_field.send_keys(config['credentials']['email'])
@@ -70,7 +71,7 @@ def update_profile(config: map, salary: int) -> None:
         signin_btn: WebElement = (WDWait(driver, 5)
                                   .until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit"]'))))
     except Exception as e:
-        print(e)
+        logging.exception('Exception occurred')
     signin_btn.click()
     assert 'Dashboard Home Feed | Dice.com' in driver.title
     profile_link = driver.find_element(By.ID, 'profileLink')
@@ -98,3 +99,4 @@ def update_profile(config: map, salary: int) -> None:
     if config['args']['dev_stop']:
         time.sleep(600)
     driver.close()
+    return True
