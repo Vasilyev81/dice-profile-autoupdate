@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  diceprofileautoupdate:
+    image: diceprofileautoupdate
+    build:
+      context: .
+      dockerfile: ./Dockerfile
