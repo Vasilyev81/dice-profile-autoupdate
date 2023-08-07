@@ -14,9 +14,9 @@ from selenium.webdriver.support.wait import WebDriverWait as WDWait
 login_page: str = 'https://www.dice.com/dashboard/login'
 
 
-def random_wait(driver) -> None:
-    w_time = random.randrange(10, 40, 1) / 10
-    driver.implicitly_wait(w_time)
+def random_wait() -> None:
+    w_time = random.randrange(200, 700, 1) / 100
+    time.sleep(w_time)
 
 
 def has(v_type: str, value: str) -> any:
@@ -50,9 +50,11 @@ def update_profile(config: configparser.ConfigParser, salary: int) -> None:
     options = Options()
     if config['args']['headless']:
         options.add_argument('--headless=new')
+        options.add_argument('--disable-gpu')
+    options.add_argument("--no-sandbox")
+    options.add_argument("--start-maximized")
+    options.add_argument("window-size=1920,1080") 
     driver = webdriver.Chrome(options=options)
-    driver.set_window_size(1920, 1080)
-    driver.maximize_window()
     driver.get(login_page)
     assert 'Sign In' in driver.title
     try:
