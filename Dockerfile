@@ -53,7 +53,7 @@ USER andrey
 # EXPOSE 80
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["python", "app.py", "p"]
+CMD ["python", "app.py", "p", "h"]
 
 # docker build -t dice_au .
 # docker run -e -v /Users/andrey/dua:/app/dua -v /etc/localtime:/etc/localtime:ro dice_au
