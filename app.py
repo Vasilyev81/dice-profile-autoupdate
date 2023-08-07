@@ -17,7 +17,7 @@ last_used_salary: int
 config: configparser.ConfigParser
 
 
-def setup_logging() -> None:
+def setup_logging(in_prod: bool) -> None:
     if in_prod:
         log_path = pathlib.Path('/app/dua/log/app.log')
     else:
@@ -28,7 +28,7 @@ def setup_logging() -> None:
                         datefmt='%d-%b-%y %H:%M:%S', level=logging.DEBUG)
 
 
-def read_config(prod: bool) -> configparser.ConfigParser:
+def read_config(in_prod: bool) -> configparser.ConfigParser:
     if in_prod:
         config_path = pathlib.Path('/app/dua/configs/config.ini')
     else:
@@ -40,21 +40,23 @@ def read_config(prod: bool) -> configparser.ConfigParser:
     return conf
 
 
-def get_configuration() -> configparser.ConfigParser:
-    headless = len(sys.argv) > 1 and 'h' in sys.argv
-    dev_stop = len(sys.argv) > 1 and 'd' in sys.argv
+def get_configuration(in_prod: bool) -> configparser.ConfigParser:
+    if len(sys.argv) > 0:
+        headless = 'h' in sys.argv
+        dev_stop = 'd' in sys.argv
     logging.info(f"Running mode: in production:{in_prod}; "
                  f"headless browser:{headless}; "
                  f"pause browser to get access to devTools:{dev_stop}.")
-    config_data = read_config(in_prod)
-    config_data['args'] = {'in_prod': in_prod,
+    conf = read_config(in_prod)
+    conf['args'] = {'in_prod': in_prod,
                            'headless': headless, 'dev_stop': dev_stop}
+    return conf
 
 
 def random_salary() -> int:
     salaries: list = []
     for key, val in config.items('salary'):
-        salaries.append(val)
+        salaries.append(int(val))
     salaries.remove(last_used_salary)
     return random.choice(salaries)
 
@@ -98,9 +100,9 @@ def schedule_dice_editing() -> None:
                                                                   update_profile).tag('dice_job')
 
 
-in_prod = len(sys.argv) > 1 and 'p' in sys.argv
-setup_logging()
-config = get_configuration()
+in_prod = len(sys.argv) > 0 and 'p' in sys.argv
+setup_logging(in_prod)
+config = get_configuration(in_prod)
 
 schedule.every().day.at(
     '09:00', 'America/Los_Angeles').do(schedule_dice_editing).tag('job_scheduler')
