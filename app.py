@@ -68,8 +68,7 @@ def update_profile() -> Type[CancelJob]:
     salary = random_salary()
     global last_used_salary
     last_used_salary = salary
-    job_res: bool = False
-    job_res = dice_job(config, salary)
+    job_res: bool = dice_job(config, salary) or False
     message: str = f"Dice profile update {'complete' if job_res else 'failed'}."
     threading.Thread(target=send_notification,
                      args=(message,), daemon=True).start()
@@ -85,7 +84,7 @@ def send_notification(message: str) -> None:
     data = 'Dice Profile Updater'
     pb = PushBullet(config['credentials']['token'])
     push = pb.push_note(data, message)
-    logging.info(message, push['iden'], push['active'])
+    logging.info(f"{message}, id: {push['iden']}, active: {push['active']}")
 
 
 def random_time() -> str:
