@@ -35,7 +35,7 @@ def has(v_type: str, value: str) -> any:
     return internal_has
 
 
-def print_elements(data: WebElement | list[WebElement]) -> bool:
+def print_elements(data: WebElement | list[WebElement]) -> None:
     if isinstance(data, list):
         print(f"{len(data)} elements")
         for idx, elm in enumerate(data):
@@ -44,7 +44,7 @@ def print_elements(data: WebElement | list[WebElement]) -> bool:
         print(f"<{data.tag_name}> class='{data.get_attribute('class')}', text:{data.text}")
 
 
-def update_profile(config: configparser.ConfigParser, salary: int) -> None:
+def update_profile(config: configparser.ConfigParser, salary: int) -> bool:
     # noinspection PyTypeChecker
     email_field = password_field = signin_btn = None
     options = Options()

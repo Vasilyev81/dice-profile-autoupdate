@@ -21,7 +21,7 @@ def setup_logging(in_prod: bool) -> None:
     if in_prod:
         log_path = pathlib.Path('/app/dua/log/app.log')
     else:
-        pathlib.Path(__file__).parent.resolve().joinpath('log', 'app.log')
+        log_path = pathlib.Path(__file__).parent.resolve().joinpath('log', 'app.log')
     log_path.touch(511, exist_ok=True)
     logging.basicConfig(filename=log_path, filemode='w',
                         format='%(asctime)s %(levelname)s [%(filename)s, line %(lineno)d, %(funcName)s()] %(message)s',
@@ -32,8 +32,9 @@ def read_config(in_prod: bool) -> configparser.ConfigParser:
     if in_prod:
         config_path = pathlib.Path('/app/dua/configs/config.ini')
     else:
-        pathlib.Path(__file__).parent.resolve().joinpath('configs', 'config.ini')
-    if not config_path.exists(): logging.error('Error reading config, file not exists')
+        config_path = pathlib.Path(__file__).parent.resolve().joinpath('configs', 'config.ini')
+    if not config_path.exists():
+        logging.error('Error reading config, file not exists')
     conf = configparser.ConfigParser()
     conf.read(config_path)
     logging.info(f"Checking conf info, token:{conf['credentials']['token']}")
@@ -41,6 +42,7 @@ def read_config(in_prod: bool) -> configparser.ConfigParser:
 
 
 def get_configuration(in_prod: bool) -> configparser.ConfigParser:
+    headless, dev_stop = False, False
     if len(sys.argv) > 0:
         headless = 'h' in sys.argv
         dev_stop = 'd' in sys.argv
@@ -48,8 +50,9 @@ def get_configuration(in_prod: bool) -> configparser.ConfigParser:
                  f"headless browser:{headless}; "
                  f"pause browser to get access to devTools:{dev_stop}.")
     conf = read_config(in_prod)
+    # noinspection PyTypeChecker
     conf['args'] = {'in_prod': in_prod,
-                           'headless': headless, 'dev_stop': dev_stop}
+                    'headless': headless, 'dev_stop': dev_stop}
     return conf
 
 
@@ -69,7 +72,7 @@ def update_profile() -> Type[CancelJob]:
     job_res = dice_job(config, salary)
     message: str = f"Dice profile update {'complete' if job_res else 'failed'}."
     threading.Thread(target=send_notification,
-                 args=(message,), daemon=True).start()
+                     args=(message,), daemon=True).start()
     return schedule.CancelJob
 
 
@@ -100,9 +103,9 @@ def schedule_dice_editing() -> None:
                                                                   update_profile).tag('dice_job')
 
 
-in_prod = len(sys.argv) > 0 and 'p' in sys.argv
-setup_logging(in_prod)
-config = get_configuration(in_prod)
+prod = len(sys.argv) > 0 and 'p' in sys.argv
+setup_logging(prod)
+config = get_configuration(prod)
 
 schedule.every().day.at(
     '09:00', 'America/Los_Angeles').do(schedule_dice_editing).tag('job_scheduler')
