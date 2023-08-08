@@ -58,6 +58,9 @@ def get_configuration(in_prod: bool) -> configparser.ConfigParser:
 
 def random_salary() -> int:
     salaries: list = []
+    global last_used_salary
+    if last_used_salary is None:
+        last_used_salary = 90000
     for key, val in config.items('salary'):
         salaries.append(int(val))
     salaries.remove(last_used_salary)
@@ -81,9 +84,9 @@ def run_threaded(job_func):
 
 
 def send_notification(message: str) -> None:
-    data = 'Dice Profile Updater'
+    title = 'Dice Profile Updater'
     pb = PushBullet(config['credentials']['token'])
-    push = pb.push_note(data, message)
+    push = pb.push_note(title, message)
     logging.info(f"{message}, id: {push['iden']}, active: {push['active']}")
 
 
