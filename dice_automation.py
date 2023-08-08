@@ -45,6 +45,7 @@ def print_elements(data: WebElement | list[WebElement]) -> None:
 
 
 def update_profile(config: configparser.ConfigParser, salary: int) -> bool:
+    logging.debug(f"Starting dice profile update, salary:{salary}")
     # noinspection PyTypeChecker
     email_field = password_field = signin_btn = None
     options = Options()
@@ -66,25 +67,33 @@ def update_profile(config: configparser.ConfigParser, salary: int) -> bool:
     except Exception as e:
         logging.exception('Exception occurred')
     email_field.clear()
+    random_wait()
     password_field.clear()
+    random_wait()
     email_field.send_keys(config['credentials']['email'])
+    random_wait()
     password_field.send_keys(config['credentials']['pwd'])
+    random_wait()
     try:
         signin_btn: WebElement = (WDWait(driver, 5)
                                   .until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit"]'))))
     except Exception as e:
         logging.exception('Exception occurred')
+    random_wait()
     signin_btn.click()
     assert 'Dashboard Home Feed | Dice.com' in driver.title
+    random_wait()
     profile_link = driver.find_element(By.ID, 'profileLink')
     profile_link.click()
     assert 'Profile | Dice.com' in driver.title
+    random_wait()
     time.sleep(3)
     sr: ShadowRoot = driver.find_element(By.TAG_NAME, 'dhi-candidates-wired-candidate-profile').shadow_root
     edit_ij_btn: WebElement = (sr.find_element(
         By.CSS_SELECTOR, 'dhi-candidates-candidate-profile-ideal-job-view > div > dhi-seds-core-button')
                                .shadow_root.find_element(By.CSS_SELECTOR, 'button > dhi-seds-icon'))
     edit_ij_btn.click()
+    random_wait()
     time.sleep(3)
     input_shadow_host: WebElement = (sr.find_element(
         By.CSS_SELECTOR, 'dhi-candidates-wired-candidate-profile-ideal-job '
@@ -92,13 +101,16 @@ def update_profile(config: configparser.ConfigParser, salary: int) -> bool:
                          'div:nth-child(2) input'))
 
     input_shadow_host.clear()
+    random_wait()
     input_shadow_host.send_keys(salary)
 
     confirm_btn: WebElement = sr.find_element(
         By.CSS_SELECTOR, 'dhi-candidates-wired-candidate-profile-ideal-job dhi-seds-core-button:nth-child(2)')
+    random_wait()
     confirm_btn.click()
 
     if config['args']['dev_stop']:
         time.sleep(600)
+    random_wait()
     driver.close()
     return True
