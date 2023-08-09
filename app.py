@@ -13,7 +13,7 @@ from pushbullet import PushBullet
 
 from dice_automation import update_profile as dice_job
 
-last_used_salary: int
+last_used_salary: int = 0
 config: configparser.ConfigParser
 
 
@@ -63,7 +63,8 @@ def random_salary() -> int:
         last_used_salary = 90000
     for key, val in config.items('salary'):
         salaries.append(int(val))
-    salaries.remove(last_used_salary)
+    if last_used_salary in salaries:
+        salaries.remove(last_used_salary)
     return random.choice(salaries)
 
 
@@ -96,7 +97,8 @@ def random_time() -> str:
 
 
 def schedule_dice_editing() -> None:
-    sched_time = random_time()
+    # sched_time = random_time()
+    sched_time = "13:00:00"
     message = f"profile update scheduled to: {sched_time}"
     logging.info(message)
     threading.Thread(target=send_notification,
